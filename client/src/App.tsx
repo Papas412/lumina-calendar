@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useCalendar } from './hooks/useCalendar';
 import type { Appointment, CreateAppointmentDto } from './shared/types';
 import './App.css';

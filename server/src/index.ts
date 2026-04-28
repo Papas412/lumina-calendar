@@ -4,85 +4,98 @@ import bodyParser from 'body-parser';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Appointment, CreateAppointmentDto } from '../../client/src/shared/types.js';
+import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const DATA_FILE = path.join(__dirname, 'appointments.json');
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/lumina-calendar';
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// Load data from file
-const loadAppointments = (): Appointment[] => {
-  if (!fs.existsSync(DATA_FILE)) {
-    return [];
-  }
-  try {
-    const data = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (e) {
-    return [];
-  }
-};
+// MongoDB Schema
+const appointmentSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  date: { type: String, required: true },
+  slot: { type: String, enum: ['whole-day', 'am', 'pm'], required: true },
+  color: { type: String, required: true },
+  description: String,
+  time: String
+});
 
-// Save data to file
-const saveAppointments = (appointments: Appointment[]) => {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(appointments, null, 2));
-};
+// Convert _id to id when sending to frontend
+appointmentSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  }
+});
 
-let appointments: Appointment[] = loadAppointments();
+const AppointmentModel = mongoose.model('Appointment', appointmentSchema);
+
+// Connect to MongoDB
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // API Routes
-app.get('/api/appointments', (req, res) => {
-  res.json(appointments);
-});
-
-app.post('/api/appointments', (req, res) => {
-  const dto: CreateAppointmentDto = req.body;
-  const newAppointment: Appointment = {
-    ...dto,
-    id: Math.random().toString(36).substr(2, 9)
-  };
-  appointments.push(newAppointment);
-  saveAppointments(appointments);
-  res.status(201).json(newAppointment);
-});
-
-app.put('/api/appointments/:id', (req, res) => {
-  const { id } = req.params;
-  const updatedData: Partial<Appointment> = req.body;
-  const index = appointments.findIndex(a => a.id === id);
-  
-  if (index !== -1) {
-    appointments[index] = { ...appointments[index], ...updatedData };
-    saveAppointments(appointments);
-    res.json(appointments[index]);
-  } else {
-    res.status(404).send('Appointment not found');
+app.get('/api/appointments', async (req, res) => {
+  try {
+    const appointments = await AppointmentModel.find({});
+    res.json(appointments);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch appointments' });
   }
 });
 
-app.delete('/api/appointments/:id', (req, res) => {
-  const { id } = req.params;
-  appointments = appointments.filter(a => a.id !== id);
-  saveAppointments(appointments);
-  res.status(204).send();
+app.post('/api/appointments', async (req, res) => {
+  try {
+    const newAppointment = new AppointmentModel(req.body);
+    const saved = await newAppointment.save();
+    res.status(201).json(saved);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to create appointment' });
+  }
+});
+
+app.put('/api/appointments/:id', async (req, res) => {
+  try {
+    const updated = await AppointmentModel.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true, runValidators: true }
+    );
+    if (!updated) return res.status(404).send('Not found');
+    res.json(updated);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update appointment' });
+  }
+});
+
+app.delete('/api/appointments/:id', async (req, res) => {
+  try {
+    const deleted = await AppointmentModel.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).send('Not found');
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete appointment' });
+  }
 });
 
 // Deployment logic: Serve static files from the React app
 const clientDistPath = path.join(__dirname, '../../client/dist');
 app.use(express.static(clientDistPath));
 
-// For any other request, send the index.html from the frontend
 app.get('*', (req, res) => {
-  if (fs.existsSync(path.join(clientDistPath, 'index.html'))) {
-    res.sendFile(path.join(clientDistPath, 'index.html'));
+  const indexPath = path.join(clientDistPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
   } else {
-    res.send('Lumina Calendar API is running. Frontend not built yet.');
+    res.send('Lumina Calendar API is running. Build frontend to see the UI.');
   }
 });
 
