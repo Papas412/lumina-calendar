@@ -90,7 +90,7 @@ app.delete('/api/appointments/:id', async (req, res) => {
 const clientDistPath = path.join(__dirname, '../../client/dist');
 app.use(express.static(clientDistPath));
 
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   const indexPath = path.join(clientDistPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
