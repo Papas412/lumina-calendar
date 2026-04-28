@@ -150,44 +150,46 @@ function App() {
           </div>
         </div>
 
-        <div className="calendar-grid">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="weekday-header">{day}</div>
-          ))}
-          {daysInMonth.map((dayObj, index) => {
-            const dayAppointments = getAppointmentsForDay(dayObj.date);
-            return (
-              <div 
-                key={index} 
-                className={`day-cell ${!dayObj.currentMonth ? 'other-month' : ''} ${isToday(dayObj.date) ? 'today' : ''}`}
-                onClick={() => openAddModal(dayObj.date)}
-              >
-                <span className="day-number">{dayObj.date.getDate()}</span>
-                <div className="appointments-list">
-                  {dayAppointments.slice(0, 3).map(app => (
-                    <div 
-                      key={app.id} 
-                      className="appointment-pill"
-                      style={{ backgroundColor: app.color }}
-                      onClick={(e) => openEditModal(e, app)}
-                    >
-                      {getSlotLabel(app.slot) && (
-                        <span style={{ fontWeight: 'bold', marginRight: '4px', opacity: 0.8 }}>
-                          {getSlotLabel(app.slot)}
-                        </span>
-                      )}
-                      {app.title}
-                    </div>
-                  ))}
-                  {dayAppointments.length > 3 && (
-                    <div className="appointment-pill" style={{ backgroundColor: '#94a3b8', fontSize: '0.6rem' }}>
-                      + {dayAppointments.length - 3} more
-                    </div>
-                  )}
+        <div className="calendar-grid-wrap">
+          <div className="calendar-grid">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="weekday-header">{day}</div>
+            ))}
+            {daysInMonth.map((dayObj, index) => {
+              const dayAppointments = getAppointmentsForDay(dayObj.date);
+              return (
+                <div 
+                  key={index} 
+                  className={`day-cell ${!dayObj.currentMonth ? 'other-month' : ''} ${isToday(dayObj.date) ? 'today' : ''}`}
+                  onClick={() => openAddModal(dayObj.date)}
+                >
+                  <span className="day-number">{dayObj.date.getDate()}</span>
+                  <div className="appointments-list">
+                    {dayAppointments.slice(0, 3).map(app => (
+                      <div 
+                        key={app.id} 
+                        className="appointment-pill"
+                        style={{ backgroundColor: app.color }}
+                        onClick={(e) => openEditModal(e, app)}
+                      >
+                        {getSlotLabel(app.slot) && (
+                          <span style={{ fontWeight: 'bold', marginRight: '4px', opacity: 0.8 }}>
+                            {getSlotLabel(app.slot)}
+                          </span>
+                        )}
+                        {app.title}
+                      </div>
+                    ))}
+                    {dayAppointments.length > 3 && (
+                      <div className="appointment-pill" style={{ backgroundColor: '#94a3b8', fontSize: '0.6rem' }}>
+                        + {dayAppointments.length - 3} more
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 

@@ -92,6 +92,10 @@ body {
   overflow: hidden;
 }
 
+.calendar-grid-wrap {
+  width: 100%;
+}
+
 .weekday-header {
   background: white;
   padding: 1rem;
@@ -210,4 +214,78 @@ body {
   justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    margin: 1rem auto;
+    padding: 0 0.75rem;
+  }
+
+  .calendar-card {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+
+  .calendar-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .current-month {
+    font-size: 1.2rem;
+  }
+
+  .nav-buttons {
+    width: 100%;
+  }
+
+  .btn {
+    min-height: 40px;
+  }
+
+  .calendar-grid-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .calendar-grid {
+    min-width: 680px;
+  }
+
+  .day-cell {
+    min-height: 90px;
+    padding: 0.4rem;
+  }
+
+  .weekday-header {
+    padding: 0.65rem 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  .modal-content {
+    max-width: none;
+    width: calc(100% - 1.5rem);
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .form-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .appointment-pill {
+    font-size: 0.65rem;
+  }
+
+  .day-number {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    font-size: 0.8rem;
+  }
 }

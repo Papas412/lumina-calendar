@@ -11,7 +11,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/lumina-calendar';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  throw new Error('Missing MONGODB_URI environment variable');
+}
 
 app.use(cors());
 app.use(bodyParser.json());

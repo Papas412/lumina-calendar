@@ -18,5 +18,12 @@
     "color": "#6366f1",
     "slot": "whole-day",
     "id": "dw9lcg32x"
+  },
+  {
+    "title": "test",
+    "date": "2026-05-07T23:00:00.000Z",
+    "color": "#6366f1",
+    "slot": "whole-day",
+    "id": "ns5mi3leg"
   }
 ]
